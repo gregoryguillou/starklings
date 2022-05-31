@@ -4,8 +4,6 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.math import assert_le
 
-# I AM NOT DONE
-
 @storage_var
 func dust(address : felt) -> (amount : felt):
 end
@@ -14,6 +12,25 @@ end
 # Create two storages `star` and `slot`
 # `slot` will map an `address` to the next available `slot` this `address` can use
 # `star` will map an `address` and a `slot` to a `size`
+@storage_var
+func slot(address : felt) -> (slot : felt):
+end
+
+@storage_var
+func star(address : felt, slot: felt) -> (size : felt):
+end
+
+@view
+func view_slot{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(address : felt) -> (res : felt):
+    let (res)=slot.read(address)
+    return (res)
+end
+
+@view
+func view_star{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(address : felt, slot: felt) -> (size : felt):
+    let (size) = star.read(address, slot)
+    return (size)
+end
 
 # TODO
 # Create an event `a_star_is_born`
@@ -22,6 +39,9 @@ end
 # - the `slot` where this `star` has been registered
 # - the size of the given `star`
 # https://starknet.io/docs/hello_starknet/events.html
+@event
+func a_star_is_born(account: felt, slot: felt, size: felt):
+end
 
 @external
 func collect_dust{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(amount : felt):
@@ -43,14 +63,22 @@ func light_star{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
 ):
     # TODO
     # Get the caller address
+    let (sender_address) = get_caller_address()
     # Get the amount on dust owned by the caller
+    let (current_dust) = dust.read(sender_address)
     # Make sure this amount is at least equal to `dust_amount`
+    assert_le(dust_amount, current_dust)
     # Get the caller next available `slot`
+    let (next) = slot.read(sender_address)
     # Update the amount of dust owned by the caller
+    let newdust = current_dust - dust_amount
+    dust.write(sender_address, newdust)
     # Register the newly created star, with a size equal to `dust_amount`
+    star.write(sender_address, next, dust_amount)
     # Increment the caller next available slot
+    slot.write(sender_address, next+1)
     # Emit an `a_star_is_born` even with appropiate valued
-
+    a_star_is_born.emit(sender_address, next, dust_amount) 
     return ()
 end
 

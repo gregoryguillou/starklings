@@ -4,8 +4,6 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.math import assert_le
 
-# I AM NOT DONE
-
 struct Star:
     member name : felt
     member size : felt
@@ -92,7 +90,16 @@ func insert_star{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     # https://www.cairo-lang.org/docs/how_cairo_works/consts.html#revoked-references
     # That's one of the most tricky feature of cairo. Treat yourself !
     # Also, Cairo doesn't support `elif`, neither chaining multiple comparaisons on a single `if` arm 😔
-
+    if current_slot * (current_slot - 9) * (current_slot - 99) == 0:
+        increase_rank(address)
+        tempvar syscall_ptr = syscall_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+        tempvar range_check_ptr = range_check_ptr
+    else:
+        tempvar syscall_ptr = syscall_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+        tempvar range_check_ptr = range_check_ptr
+    end
     a_star_is_born.emit(address, current_slot, new_star)
 
     return ()
