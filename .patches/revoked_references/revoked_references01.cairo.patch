@@ -1,0 +1,13 @@
+diff --git a/exercises/revoked_references/revoked_references01.cairo b/exercises/revoked_references/revoked_references01.cairo
+index da6a31f..8c7352b 100644
+--- a/exercises/revoked_references/revoked_references01.cairo
++++ b/exercises/revoked_references/revoked_references01.cairo
+@@ -19,0 +20,8 @@ func congratulate{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
++    if score == 0:
++        congratulation.write('You can do better')
++        tempvar syscall_ptr = syscall_ptr
++        tempvar pedersen_ptr = pedersen_ptr
++        tempvar range_check_ptr = range_check_ptr
++    else:
++        congratulation.write('You did good')
++    end
